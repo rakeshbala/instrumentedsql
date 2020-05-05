@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/log"
 
 	"github.com/fanatic/instrumentedsql"
 )
@@ -45,4 +46,11 @@ func (s span) Finish() {
 		return
 	}
 	s.parent.Finish()
+}
+
+func (s span) LogFields(k, v string) {
+	if s.parent == nil {
+		return
+	}
+	s.parent.LogFields(log.String(k, v))
 }
