@@ -451,9 +451,15 @@ func (s *wrappedStmt) QueryContext(ctx context.Context, args []driver.NamedValue
 }
 
 func (r *wrappedResult) LastInsertId() (id int64, err error) {
-	r.span.LogFields("event", "sql-res-lastInsertId")
+	var span Span
+	if r.span != nil {
+		span = r.span.NewChild("sql-res-lastInsertId")
+	} else {
+		span = r.GetSpan(r.ctx).NewChild("sql-res-lastInsertId")
+	}
 	defer func() {
-		r.span.LogFields("err", fmt.Sprint(err))
+		span.SetLabel("err", fmt.Sprint(err))
+		span.Finish()
 		r.Log(r.ctx, "sql-res-lastInsertId", "err", err)
 	}()
 
@@ -461,9 +467,15 @@ func (r *wrappedResult) LastInsertId() (id int64, err error) {
 }
 
 func (r *wrappedResult) RowsAffected() (num int64, err error) {
-	r.span.LogFields("event", "sql-res-rowsAffected")
+	var span Span
+	if r.span != nil {
+		span = r.span.NewChild("sql-res-rowsAffected")
+	} else {
+		span = r.GetSpan(r.ctx).NewChild("sql-res-rowsAffected")
+	}
 	defer func() {
-		r.span.LogFields("err", fmt.Sprint(err))
+		span.SetLabel("err", fmt.Sprint(err))
+		span.Finish()
 		r.Log(r.ctx, "sql-res-rowsAffected", "err", err)
 	}()
 
@@ -479,12 +491,6 @@ func (r *wrappedRows) Close() error {
 }
 
 func (r *wrappedRows) Next(dest []driver.Value) (err error) {
-	r.span.LogFields("event", "sql-rows-next")
-	defer func() {
-		r.span.LogFields("err", fmt.Sprint(err))
-		r.Log(r.ctx, "sql-rows-next", "err", err)
-	}()
-
 	return r.parent.Next(dest)
 }
 

@@ -14,7 +14,6 @@ type Span interface {
 	NewChild(string) Span
 	SetLabel(k, v string)
 	Finish()
-	LogFields(k, v string)
 }
 
 type nullTracer struct{}
@@ -31,5 +30,3 @@ func (nullSpan) NewChild(string) Span {
 func (nullSpan) SetLabel(k, v string) {}
 
 func (nullSpan) Finish() {}
-
-func (nullSpan) LogFields(k, v string) {}
